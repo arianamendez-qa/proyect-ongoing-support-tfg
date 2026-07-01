@@ -1,0 +1,35 @@
+{
+  "name": "proyect-ongoing-support-tfg",
+  "version": "1.0.0",
+  "description": "Suite de automatización E2E/UI con Playwright para las marcas Hobbs y Phase Eight",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "test:hobbs": "playwright test --project=hobbs",
+    "test:phase-eight": "playwright test --project=phase-eight",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report reports/html",
+    "codegen:hobbs": "playwright codegen https://stage.hobbs.com/",
+    "codegen:phase-eight": "playwright codegen https://stage.phase-eight.com/"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "automation",
+    "qa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^26.0.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

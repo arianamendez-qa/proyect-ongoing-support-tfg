@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    // Versión moderna de JS/TS
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // Chequeos estrictos (recomendado para mantener el código sano)
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Solo type-check, Playwright se encarga de transpilar/ejecutar
+    "noEmit": true,
+
+    // Tipos disponibles
+    "types": ["node"],
+
+    // Imports cortos: en vez de ../../pages/common/base.page
+    // puedes escribir @pages/common/base.page
+    // (con moduleResolution "bundler" los paths son relativos a este archivo)
+    "paths": {
+      "@pages/*": ["./pages/*"],
+      "@fixtures/*": ["./fixtures/*"],
+      "@data/*": ["./data/*"]
+    }
+  },
+  "include": [
+    "tests/**/*.ts",
+    "pages/**/*.ts",
+    "fixtures/**/*.ts",
+    "data/**/*.ts",
+    "playwright.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}
