@@ -8,6 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test:hobbs": "playwright test --project=hobbs",
     "test:phase-eight": "playwright test --project=phase-eight",
+    "test:whistles": "playwright test --project=whistles",
+    "test:sanity": "playwright test --project=sanity",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",

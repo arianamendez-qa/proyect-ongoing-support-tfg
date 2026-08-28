@@ -13,6 +13,12 @@ const httpCredentials = {
   password: process.env.BASIC_AUTH_PASSWORD ?? '',
 };
 
+// TARGET_ENV controla el entorno de la Sanity Suite.
+// staging (por defecto) = sandbox SFCC | production = producción real.
+// Producción no usa Basic Auth, así que el proyecto sanity la omite.
+const targetEnv = process.env.TARGET_ENV ?? 'staging';
+const isSandbox = targetEnv !== 'production';
+
 export default defineConfig({
 
   // ─── ¿Dónde están los tests? ────────────────────────────────────────────────
@@ -81,6 +87,41 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: process.env.PHASE_EIGHT_BASE_URL,
+      },
+    },
+    {
+      name: 'inside-story',
+      testMatch: 'inside-story/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.INSIDE_STORY_BASE_URL,
+      },
+    },
+    // ─── Sanity Suite — cross-site health checks (Hobbs, Phase Eight, Inside Story) ──
+    // Tests usan URLs absolutas de data/sanity.data.ts.
+    // Basic Auth sólo en sandbox; producción no la necesita.
+    {
+      name: 'sanity',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        httpCredentials: isSandbox ? httpCredentials : undefined,
+      },
+    },
+    // ─── Manage Service — hotfix and release folders ──────────────────────────
+    // Tests use absolute URLs from brand data files so baseURL is just the sandbox root.
+    {
+      name: 'manage-service',
+      testMatch: [
+        'hotfix-*/**/*.spec.ts',
+        'release-*/**/*.spec.ts',
+        'search-ui-optimisation/**/*.spec.ts',
+        'paid-returns/**/*.spec.ts',
+        'gift-cards/**/*.spec.ts',
+      ],
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.SANDBOX_URL,
       },
     },
   ],
