@@ -1,0 +1,43 @@
+import { Page, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
+import { BasketPage } from './basket.page';
+
+/**
+ * ProductDetailPage (PDP) — página de detalle de producto.
+ *
+ * Selectores basados en SFCC SFRA estándar. Si algún selector no coincide
+ * con el sitio real, ajustar aquí sin tocar los tests.
+ */
+export class ProductDetailPage extends BasePage {
+  readonly sizeButtons: Locator;
+  readonly addToCartButton: Locator;
+  readonly minicartGoToCart: Locator;
+  readonly addToCartConfirmation: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    // Botones de talla disponibles (excluye agotados y deshabilitados)
+    this.sizeButtons = page.locator('.size-btn:not(.unselectable):not(.out-of-stock), button[data-attr="size"]:not([disabled])');
+    this.addToCartButton = page.locator('button.add-to-cart:not([disabled])').first();
+    // Tras añadir al carrito aparece un mini-cart con enlace a la cesta
+    this.minicartGoToCart = page.locator('.minicart .go-to-cart, .mini-cart .view-cart, a[href*="/cart"]').first();
+    this.addToCartConfirmation = page.locator('.add-to-cart-messages, .cart-and-ipay').first();
+  }
+
+  /** Selecciona la primera talla disponible. */
+  async selectFirstAvailableSize(): Promise<void> {
+    const firstSize = this.sizeButtons.first();
+    await firstSize.waitFor({ state: 'visible', timeout: 10000 });
+    await firstSize.click();
+  }
+
+  /** Añade el producto al carrito y navega a la cesta. */
+  async addToCartAndGoToBasket(): Promise<BasketPage> {
+    await this.addToCartButton.waitFor({ state: 'visible' });
+    await this.addToCartButton.click();
+
+    // Navegar directamente al carrito es más estable que esperar el mini-cart
+    await this.page.goto('/cart');
+    return new BasketPage(this.page);
+  }
+}
