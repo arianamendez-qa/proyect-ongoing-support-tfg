@@ -92,6 +92,15 @@ export default defineConfig({
         baseURL: process.env.INSIDE_STORY_BASE_URL,
       },
     },
+    // ─── Sanity — health checks cross-site multi-región ─────────────────────
+    {
+      name: 'sanity',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        httpCredentials,
+      },
+    },
     // ─── Regression — staging y producción multi-región ──────────────────────
     {
       name: 'regression-staging',
