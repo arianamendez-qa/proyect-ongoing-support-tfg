@@ -13,11 +13,6 @@ const httpCredentials = {
   password: process.env.BASIC_AUTH_PASSWORD ?? '',
 };
 
-// TARGET_ENV controla el entorno de la Sanity Suite.
-// staging (por defecto) = sandbox SFCC | production = producción real.
-// Producción no usa Basic Auth, así que el proyecto sanity la omite.
-const targetEnv = process.env.TARGET_ENV ?? 'staging';
-const isSandbox = targetEnv !== 'production';
 
 export default defineConfig({
 
@@ -97,15 +92,20 @@ export default defineConfig({
         baseURL: process.env.INSIDE_STORY_BASE_URL,
       },
     },
-    // ─── Sanity Suite — cross-site health checks (Hobbs, Phase Eight, Inside Story) ──
-    // Tests usan URLs absolutas de data/sanity.data.ts.
-    // Basic Auth sólo en sandbox; producción no la necesita.
+    // ─── Regression — staging y producción multi-región ──────────────────────
     {
-      name: 'sanity',
-      testMatch: 'sanity/**/*.spec.ts',
+      name: 'regression-staging',
+      testMatch: 'regression/staging-e2e.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        httpCredentials: isSandbox ? httpCredentials : undefined,
+        httpCredentials,
+      },
+    },
+    {
+      name: 'regression-prod',
+      testMatch: 'regression/production-e2e.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
       },
     },
     // ─── Manage Service — hotfix and release folders ──────────────────────────

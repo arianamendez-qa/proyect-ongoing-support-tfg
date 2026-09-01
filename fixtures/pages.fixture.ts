@@ -1,6 +1,9 @@
 import { test as base } from '@playwright/test';
 import { HomePage } from '@pages/common/home.page';
 import { SearchResultsPage } from '@pages/common/search-results.page';
+import { ProductDetailPage } from '@pages/common/product-detail.page';
+import { BasketPage } from '@pages/common/basket.page';
+import { CheckoutPage } from '@pages/common/checkout.page';
 
 /**
  * Fixtures personalizados.
@@ -16,6 +19,9 @@ import { SearchResultsPage } from '@pages/common/search-results.page';
 type Pages = {
   homePage: HomePage;
   searchResultsPage: SearchResultsPage;
+  productDetailPage: ProductDetailPage;
+  basketPage: BasketPage;
+  checkoutPage: CheckoutPage;
 };
 
 export const test = base.extend<Pages>({
@@ -24,6 +30,15 @@ export const test = base.extend<Pages>({
   },
   searchResultsPage: async ({ page }, use) => {
     await use(new SearchResultsPage(page));
+  },
+  productDetailPage: async ({ page }, use) => {
+    await use(new ProductDetailPage(page));
+  },
+  basketPage: async ({ page }, use) => {
+    await use(new BasketPage(page));
+  },
+  checkoutPage: async ({ page }, use) => {
+    await use(new CheckoutPage(page));
   },
 });
 
