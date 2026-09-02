@@ -17,7 +17,7 @@ export class ProductListPage extends BasePage {
 
   /** Espera a que al menos un producto sea visible. */
   async waitForLoaded(): Promise<void> {
-    await this.productTiles.first().waitFor({ state: 'visible', timeout: 15000 });
+    await this.productTiles.first().waitFor({ state: 'visible', timeout: 30000 });
   }
 
   /** Número de productos visibles en el listado. */

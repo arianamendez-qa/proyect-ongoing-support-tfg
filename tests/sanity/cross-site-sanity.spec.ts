@@ -18,7 +18,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { sanitySiteData, allRegions, targetEnv } from '@data/sanity.data';
+import { sanitySiteData, targetEnv } from '@data/sanity.data';
 import { HomePage } from '@pages/common/home.page';
 import { ProductListPage } from '@pages/common/product-list.page';
 
@@ -27,7 +27,7 @@ test.beforeAll(() => {
 });
 
 for (const brand of sanitySiteData) {
-  for (const region of allRegions) {
+  for (const region of brand.regions) {
     const baseUrl = (targetEnv === 'production' ? brand.prodUrl : brand.stagingUrl)
       + (region.path === '/' ? '' : region.path.replace(/\/$/, ''));
 

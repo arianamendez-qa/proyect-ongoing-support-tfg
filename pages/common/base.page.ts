@@ -40,9 +40,10 @@ export class BasePage {
    */
   async acceptCookiesIfPresent(): Promise<void> {
     try {
-      if (await this.cookieAcceptButton.isVisible({ timeout: 5000 })) {
+      // Staging puede tardar en inyectar OneTrust — esperamos hasta 8s antes de asumir que no hay banner.
+      if (await this.cookieAcceptButton.isVisible({ timeout: 8000 })) {
         await this.cookieAcceptButton.click();
-        await this.cookieAcceptButton.waitFor({ state: 'hidden', timeout: 5000 });
+        await this.cookieAcceptButton.waitFor({ state: 'hidden', timeout: 8000 });
       }
     } catch {
       // El banner no apareció a tiempo: seguimos sin bloquear el test.

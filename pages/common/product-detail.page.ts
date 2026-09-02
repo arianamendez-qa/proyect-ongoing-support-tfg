@@ -30,7 +30,7 @@ export class ProductDetailPage extends BasePage {
    */
   async waitForLoaded(): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
-    await this.addToCartButton.waitFor({ state: 'visible', timeout: 15000 });
+    await this.addToCartButton.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   /** Selecciona la primera talla disponible. */

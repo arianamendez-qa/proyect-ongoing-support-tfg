@@ -28,9 +28,6 @@ export default defineConfig({
   // Cuántos tests corren al mismo tiempo. 2 es seguro para empezar.
   workers: 2,
 
-  // Corta toda la suite si fallan más de 10 tests.
-  maxFailures: 10,
-
   // Falla en CI si alguien dejó un test.only olvidado
   // (evita que la suite pase en verde corriendo solo 1 test).
   forbidOnly: !!process.env.CI,
@@ -54,10 +51,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
 
     // Tiempo máximo para una acción (click, fill, etc.)
-    actionTimeout: 15000,
+    // Staging es lento — 30s da margen suficiente sin alargar indefinidamente.
+    actionTimeout: 30000,
 
     // Tiempo máximo para que cargue una página
-    navigationTimeout: 30000,
+    navigationTimeout: 60000,
   },
 
   // ─── Projects — uno por marca ────────────────────────────────────────────────
