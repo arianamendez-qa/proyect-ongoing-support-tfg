@@ -5,7 +5,7 @@
  *   1. Homepage responde con 200
  *   2. Búsqueda devuelve resultados
  *   3. PLP carga con productos
- *   4. PDP carga correctamente
+ *   4. PDP carga correctamente (botón add-to-cart visible)
  *   5. Footer visible
  *
  * Entorno:
@@ -20,6 +20,7 @@
 import { test, expect } from '@playwright/test';
 import { sanitySiteData, allRegions, targetEnv } from '@data/sanity.data';
 import { HomePage } from '@pages/common/home.page';
+import { ProductListPage } from '@pages/common/product-list.page';
 
 test.beforeAll(() => {
   console.log(`[Sanity Suite] Target environment: ${targetEnv.toUpperCase()}`);
@@ -36,7 +37,10 @@ for (const brand of sanitySiteData) {
 
       test('homepage responds with 200', async ({ page }) => {
         const response = await page.goto(baseUrl);
-        expect(response?.status(), `${brand.name} [${region.name}] homepage should return 200`).toBe(200);
+        expect(
+          response?.status(),
+          `${brand.name} [${region.name}] homepage should return 200`
+        ).toBe(200);
       });
 
       test('search returns product results', async ({ page }) => {
@@ -53,23 +57,23 @@ for (const brand of sanitySiteData) {
       test('PLP loads with products', async ({ page }) => {
         const response = await page.goto(baseUrl + brand.categoryPath);
         expect(response?.status()).toBe(200);
-        const home = new HomePage(page);
-        await home.acceptCookiesIfPresent();
-        const tiles = page.locator('.product-tile');
-        await expect(tiles.first()).toBeVisible();
-        expect(await tiles.count()).toBeGreaterThan(0);
+        const plp = new ProductListPage(page);
+        await plp.acceptCookiesIfPresent();
+        await plp.waitForLoaded();
+        expect(
+          await plp.getProductCount(),
+          `Expected products on ${brand.name} [${region.name}] PLP`
+        ).toBeGreaterThan(0);
       });
 
-      test('PDP loads correctly', async ({ page }) => {
+      test('PDP loads and add-to-cart is available', async ({ page }) => {
         await page.goto(baseUrl + brand.categoryPath);
-        const home = new HomePage(page);
-        await home.acceptCookiesIfPresent();
-        // Clic en el primer producto de la PLP
-        await page.locator('.product-tile a').first().click();
-        await page.waitForLoadState('domcontentloaded');
-        // La PDP carga sin error de servidor y tiene header visible
-        await expect(page.locator('body')).not.toContainText(/500|Internal Server Error|Service Unavailable/i);
-        await expect(page.locator('header').first()).toBeVisible();
+        const plp = new ProductListPage(page);
+        await plp.acceptCookiesIfPresent();
+        await plp.waitForLoaded();
+        const pdp = await plp.clickFirstProduct();
+        // Verifica que el botón de añadir al carrito es visible — señal de que la PDP cargó correctamente
+        await expect(pdp.addToCartButton).toBeVisible();
       });
 
       test('footer is visible', async ({ page }) => {

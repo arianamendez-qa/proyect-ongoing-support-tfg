@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test';
 import { HomePage } from '@pages/common/home.page';
 import { SearchResultsPage } from '@pages/common/search-results.page';
+import { ProductListPage } from '@pages/common/product-list.page';
 import { ProductDetailPage } from '@pages/common/product-detail.page';
 import { BasketPage } from '@pages/common/basket.page';
 import { CheckoutPage } from '@pages/common/checkout.page';
@@ -19,6 +20,7 @@ import { CheckoutPage } from '@pages/common/checkout.page';
 type Pages = {
   homePage: HomePage;
   searchResultsPage: SearchResultsPage;
+  productListPage: ProductListPage;
   productDetailPage: ProductDetailPage;
   basketPage: BasketPage;
   checkoutPage: CheckoutPage;
@@ -30,6 +32,9 @@ export const test = base.extend<Pages>({
   },
   searchResultsPage: async ({ page }, use) => {
     await use(new SearchResultsPage(page));
+  },
+  productListPage: async ({ page }, use) => {
+    await use(new ProductListPage(page));
   },
   productDetailPage: async ({ page }, use) => {
     await use(new ProductDetailPage(page));
