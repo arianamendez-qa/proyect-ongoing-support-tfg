@@ -12,7 +12,8 @@ export class ProductListPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.productTiles = page.locator('.product-tile');
+    // Excluye tiles de recomendaciones de Constructor.io (tienen data-cnstrc-item="recommendation")
+    this.productTiles = page.locator('.product-tile:not([data-cnstrc-item])');
   }
 
   /** Espera a que al menos un producto sea visible. */
@@ -27,7 +28,14 @@ export class ProductListPage extends BasePage {
 
   /** Navega al primer producto y devuelve la PDP. */
   async clickFirstProduct(): Promise<ProductDetailPage> {
-    await this.productTiles.first().locator('a').first().click();
+    // Descartamos cualquier modal que haya aparecido durante la carga de la PLP
+    await this.dismissModalsIfPresent();
+    // Navegamos via href en vez de click para evitar que el hover effect
+    // (imagen alternativa del tile) cause retries infinitos en Playwright.
+    // Usamos new URL() para resolver rutas relativas contra la URL actual.
+    const href = await this.productTiles.first().locator('a').first().getAttribute('href');
+    const absoluteUrl = new URL(href!, this.page.url()).toString();
+    await this.page.goto(absoluteUrl);
     const pdp = new ProductDetailPage(this.page);
     await pdp.waitForLoaded();
     return pdp;

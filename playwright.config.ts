@@ -21,6 +21,9 @@ export default defineConfig({
 
   // ─── Cómo corren los tests ───────────────────────────────────────────────────
 
+  // Tiempo máximo por test individual. El PDP test navega PLP + PDP, por eso necesita más margen.
+  timeout: 90000,
+
   // Si un test falla, lo reintenta una vez antes de marcarlo como fallido.
   // Evita falsos negativos por problemas de red o entorno.
   retries: 1,

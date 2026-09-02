@@ -59,6 +59,7 @@ for (const brand of sanitySiteData) {
         expect(response?.status()).toBe(200);
         const plp = new ProductListPage(page);
         await plp.acceptCookiesIfPresent();
+        await plp.dismissModalsIfPresent();
         await plp.waitForLoaded();
         expect(
           await plp.getProductCount(),
@@ -70,6 +71,7 @@ for (const brand of sanitySiteData) {
         await page.goto(baseUrl + brand.categoryPath);
         const plp = new ProductListPage(page);
         await plp.acceptCookiesIfPresent();
+        await plp.dismissModalsIfPresent();
         await plp.waitForLoaded();
         const pdp = await plp.clickFirstProduct();
         // Verifica que el botón de añadir al carrito es visible — señal de que la PDP cargó correctamente

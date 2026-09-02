@@ -59,7 +59,7 @@ export const sanitySiteData: BrandData[] = [
     name: 'Inside Story',
     stagingUrl: process.env.INSIDE_STORY_BASE_URL ?? 'https://stage.insidestory.com',
     prodUrl: process.env.INSIDE_STORY_PROD_URL ?? 'https://www.insidestory.com',
-    searchTerm: 'dress',
+    searchTerm: 'table',
     categoryPath: '/all-products/',
     regions: [
       { name: 'UK', path: '/' },
