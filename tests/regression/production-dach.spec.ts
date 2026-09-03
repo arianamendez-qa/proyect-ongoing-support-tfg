@@ -1,7 +1,7 @@
 /**
  * Regression E2E — Production DACH (DE/AT/CH)
  *
- * Suite separada para la región DACH porque el sitio está en alemán.
+ * Solo Phase Eight — única marca con región alemana.
  * Para antes del pago — no se confirma ningún pedido real.
  *
  * Ejecución:
@@ -12,10 +12,10 @@ import { test, expect } from '@playwright/test';
 import { dachBrands, dachRegion } from '@data/regression.data';
 import { guestEmail, shippingAddress } from '@data/checkout.data';
 import { HomePage } from '@pages/common/home.page';
-import { SearchResultsPage } from '@pages/common/search-results.page';
 import { ProductDetailPage } from '@pages/common/product-detail.page';
 import { BasketPage } from '@pages/common/basket.page';
 import { CheckoutPage } from '@pages/common/checkout.page';
+import { ProductListPage } from '@pages/common/product-list.page';
 
 for (const brand of dachBrands) {
   const baseUrl = brand.prodUrl + dachRegion.path.replace(/\/$/, '');
@@ -26,6 +26,7 @@ for (const brand of dachBrands) {
       await page.goto(baseUrl);
       const home = new HomePage(page);
       await home.acceptCookiesIfPresent();
+      await home.dismissModalsIfPresent();
       await expect(page).toHaveTitle(brand.expectedTitlePattern);
     });
 
@@ -33,31 +34,28 @@ for (const brand of dachBrands) {
       await page.goto(baseUrl);
       const home = new HomePage(page);
       await home.acceptCookiesIfPresent();
-      const results: SearchResultsPage = await home.search(brand.searchTerm);
+      await home.dismissModalsIfPresent();
+      const results = await home.search(brand.searchTerm);
       expect(await results.getProductCount()).toBeGreaterThan(0);
     });
 
     test('PLP loads with products', async ({ page }) => {
-      // TODO: verificar si la ruta /clothing/ es válida en DACH o usar /bekleidung/
       await page.goto(baseUrl + brand.categoryPath);
-      const home = new HomePage(page);
-      await home.acceptCookiesIfPresent();
-      const tiles = page.locator('.product-tile');
-      await expect(tiles.first()).toBeVisible();
-      expect(await tiles.count()).toBeGreaterThan(0);
+      const plp = new ProductListPage(page);
+      await plp.acceptCookiesIfPresent();
+      await plp.dismissModalsIfPresent();
+      await plp.waitForLoaded();
+      expect(await plp.getProductCount()).toBeGreaterThan(0);
     });
 
     test('add to cart → basket has item', async ({ page }) => {
       await page.goto(baseUrl);
       const home = new HomePage(page);
       await home.acceptCookiesIfPresent();
+      await home.dismissModalsIfPresent();
 
-      const results: SearchResultsPage = await home.search(brand.searchTerm);
-      await results.productTiles.first().locator('a').first().click();
-      await page.waitForLoadState('domcontentloaded');
-
-      const pdp = new ProductDetailPage(page);
-      await pdp.acceptCookiesIfPresent();
+      const results = await home.search(brand.searchTerm);
+      const pdp: ProductDetailPage = await results.clickFirstProduct();
       await pdp.selectFirstAvailableSize();
       const basket: BasketPage = await pdp.addToCartAndGoToBasket();
 
@@ -68,13 +66,10 @@ for (const brand of dachBrands) {
       await page.goto(baseUrl);
       const home = new HomePage(page);
       await home.acceptCookiesIfPresent();
+      await home.dismissModalsIfPresent();
 
-      const results: SearchResultsPage = await home.search(brand.searchTerm);
-      await results.productTiles.first().locator('a').first().click();
-      await page.waitForLoadState('domcontentloaded');
-
-      const pdp = new ProductDetailPage(page);
-      await pdp.acceptCookiesIfPresent();
+      const results = await home.search(brand.searchTerm);
+      const pdp: ProductDetailPage = await results.clickFirstProduct();
       await pdp.selectFirstAvailableSize();
       const basket: BasketPage = await pdp.addToCartAndGoToBasket();
 

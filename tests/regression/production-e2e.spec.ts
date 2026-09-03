@@ -1,29 +1,28 @@
 /**
  * Regression E2E — Production
  *
- * Cubre: Hobbs · Phase Eight · Inside Story × UK · AU · EU · ROW · DACH
+ * Hobbs (UK · AU · US · ROW) · Phase Eight (UK · AU · EU · ROW) · Inside Story (UK)
  *
  * Flujo:
- *   Home → búsqueda → PLP → PDP → añadir al carrito → checkout → PARA antes del pago
+ *   Home → búsqueda → PDP → añadir al carrito → checkout → PARA antes del pago
  *
- * No se completa ningún pago real. El test verifica que el botón de
- * confirmar pedido es visible y accesible, luego termina.
+ * No se confirma ningún pedido real.
  *
  * Ejecución:
  *   npm run test:regression:prod
  */
 
 import { test, expect } from '@playwright/test';
-import { regressionBrands, regions } from '@data/regression.data';
+import { regressionBrands } from '@data/regression.data';
 import { guestEmail, shippingAddress } from '@data/checkout.data';
 import { HomePage } from '@pages/common/home.page';
-import { SearchResultsPage } from '@pages/common/search-results.page';
 import { ProductDetailPage } from '@pages/common/product-detail.page';
 import { BasketPage } from '@pages/common/basket.page';
 import { CheckoutPage } from '@pages/common/checkout.page';
+import { ProductListPage } from '@pages/common/product-list.page';
 
 for (const brand of regressionBrands) {
-  for (const region of regions) {
+  for (const region of brand.regions) {
     const baseUrl = brand.prodUrl + (region.path === '/' ? '' : region.path.replace(/\/$/, ''));
 
     test.describe(`[${brand.name}] [${region.name}] Production regression`, () => {
@@ -32,6 +31,7 @@ for (const brand of regressionBrands) {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
+        await home.dismissModalsIfPresent();
         await expect(page).toHaveTitle(brand.expectedTitlePattern);
       });
 
@@ -39,30 +39,28 @@ for (const brand of regressionBrands) {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
-        const results: SearchResultsPage = await home.search(brand.searchTerm);
+        await home.dismissModalsIfPresent();
+        const results = await home.search(brand.searchTerm);
         expect(await results.getProductCount()).toBeGreaterThan(0);
       });
 
       test('PLP loads with products', async ({ page }) => {
         await page.goto(baseUrl + brand.categoryPath);
-        const home = new HomePage(page);
-        await home.acceptCookiesIfPresent();
-        const tiles = page.locator('.product-tile');
-        await expect(tiles.first()).toBeVisible();
-        expect(await tiles.count()).toBeGreaterThan(0);
+        const plp = new ProductListPage(page);
+        await plp.acceptCookiesIfPresent();
+        await plp.dismissModalsIfPresent();
+        await plp.waitForLoaded();
+        expect(await plp.getProductCount()).toBeGreaterThan(0);
       });
 
       test('add to cart → basket has item', async ({ page }) => {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
+        await home.dismissModalsIfPresent();
 
-        const results: SearchResultsPage = await home.search(brand.searchTerm);
-        await results.productTiles.first().locator('a').first().click();
-        await page.waitForLoadState('domcontentloaded');
-
-        const pdp = new ProductDetailPage(page);
-        await pdp.acceptCookiesIfPresent();
+        const results = await home.search(brand.searchTerm);
+        const pdp: ProductDetailPage = await results.clickFirstProduct();
         await pdp.selectFirstAvailableSize();
         const basket: BasketPage = await pdp.addToCartAndGoToBasket();
 
@@ -73,13 +71,10 @@ for (const brand of regressionBrands) {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
+        await home.dismissModalsIfPresent();
 
-        const results: SearchResultsPage = await home.search(brand.searchTerm);
-        await results.productTiles.first().locator('a').first().click();
-        await page.waitForLoadState('domcontentloaded');
-
-        const pdp = new ProductDetailPage(page);
-        await pdp.acceptCookiesIfPresent();
+        const results = await home.search(brand.searchTerm);
+        const pdp: ProductDetailPage = await results.clickFirstProduct();
         await pdp.selectFirstAvailableSize();
         const basket: BasketPage = await pdp.addToCartAndGoToBasket();
 
@@ -90,7 +85,6 @@ for (const brand of regressionBrands) {
         await checkout.fillShippingAddress(shippingAddress);
         await checkout.submitShippingMethod();
 
-        // Verificamos que el paso de pago es accesible — no se confirma el pedido
         const placeOrderVisible = await checkout.isPlaceOrderVisible();
         expect(
           placeOrderVisible,
