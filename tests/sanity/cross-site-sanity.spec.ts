@@ -47,6 +47,7 @@ for (const brand of sanitySiteData) {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
+        await home.dismissModalsIfPresent();
         const results = await home.search(searchTerm);
         expect(
           await results.getProductCount(),
@@ -82,6 +83,7 @@ for (const brand of sanitySiteData) {
         await page.goto(baseUrl);
         const home = new HomePage(page);
         await home.acceptCookiesIfPresent();
+        await home.dismissModalsIfPresent();
         await expect(page.locator('footer').first()).toBeVisible();
       });
 
