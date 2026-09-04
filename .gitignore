@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables — NUNCA subir este archivo
+.env
+
+# Resultados y reportes de tests
+reports/
+playwright-report/
+test-results/
+
+# VS Code settings
+.vscode/

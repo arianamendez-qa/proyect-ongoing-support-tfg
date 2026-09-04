@@ -13,11 +13,6 @@ const httpCredentials = {
   password: process.env.BASIC_AUTH_PASSWORD ?? '',
 };
 
-// TARGET_ENV controla el entorno de la Sanity Suite.
-// staging (por defecto) = sandbox SFCC | production = producción real.
-// Producción no usa Basic Auth, así que el proyecto sanity la omite.
-const targetEnv = process.env.TARGET_ENV ?? 'staging';
-const isSandbox = targetEnv !== 'production';
 
 export default defineConfig({
 
@@ -26,15 +21,15 @@ export default defineConfig({
 
   // ─── Cómo corren los tests ───────────────────────────────────────────────────
 
+  // Tiempo máximo por test individual. El PDP test navega PLP + PDP, por eso necesita más margen.
+  timeout: 90000,
+
   // Si un test falla, lo reintenta una vez antes de marcarlo como fallido.
   // Evita falsos negativos por problemas de red o entorno.
   retries: 1,
 
   // Cuántos tests corren al mismo tiempo. 2 es seguro para empezar.
   workers: 2,
-
-  // Corta toda la suite si fallan más de 10 tests.
-  maxFailures: 10,
 
   // Falla en CI si alguien dejó un test.only olvidado
   // (evita que la suite pase en verde corriendo solo 1 test).
@@ -59,10 +54,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
 
     // Tiempo máximo para una acción (click, fill, etc.)
-    actionTimeout: 15000,
+    // Staging es lento — 30s da margen suficiente sin alargar indefinidamente.
+    actionTimeout: 30000,
 
     // Tiempo máximo para que cargue una página
-    navigationTimeout: 30000,
+    navigationTimeout: 60000,
   },
 
   // ─── Projects — uno por marca ────────────────────────────────────────────────
@@ -97,15 +93,45 @@ export default defineConfig({
         baseURL: process.env.INSIDE_STORY_BASE_URL,
       },
     },
-    // ─── Sanity Suite — cross-site health checks (Hobbs, Phase Eight, Inside Story) ──
-    // Tests usan URLs absolutas de data/sanity.data.ts.
-    // Basic Auth sólo en sandbox; producción no la necesita.
+    // ─── Sanity — health checks cross-site multi-región (Chrome · Firefox · Safari) ─
     {
-      name: 'sanity',
+      name: 'sanity-chrome',
       testMatch: 'sanity/**/*.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        httpCredentials: isSandbox ? httpCredentials : undefined,
+        httpCredentials,
+      },
+    },
+    {
+      name: 'sanity-firefox',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Firefox'],
+        httpCredentials,
+      },
+    },
+    {
+      name: 'sanity-safari',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Safari'],
+        httpCredentials,
+      },
+    },
+    // ─── Regression — staging y producción multi-región ──────────────────────
+    {
+      name: 'regression-staging',
+      testMatch: 'regression/staging-e2e.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        httpCredentials,
+      },
+    },
+    {
+      name: 'regression-prod',
+      testMatch: 'regression/production-e2e.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
       },
     },
     // ─── Manage Service — hotfix and release folders ──────────────────────────

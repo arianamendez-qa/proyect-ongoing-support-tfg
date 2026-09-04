@@ -24,6 +24,15 @@ export class ProductDetailPage extends BasePage {
     this.addToCartConfirmation = page.locator('.add-to-cart-messages, .cart-and-ipay').first();
   }
 
+  /**
+   * Espera a que la PDP esté lista verificando que el botón de add-to-cart
+   * existe — es la señal más fiable de que la página cargó correctamente.
+   */
+  async waitForLoaded(): Promise<void> {
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.addToCartButton.waitFor({ state: 'visible', timeout: 30000 });
+  }
+
   /** Selecciona la primera talla disponible. */
   async selectFirstAvailableSize(): Promise<void> {
     const firstSize = this.sizeButtons.first();

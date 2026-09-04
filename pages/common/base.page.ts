@@ -40,12 +40,37 @@ export class BasePage {
    */
   async acceptCookiesIfPresent(): Promise<void> {
     try {
-      if (await this.cookieAcceptButton.isVisible({ timeout: 5000 })) {
+      // Staging puede tardar en inyectar OneTrust — esperamos hasta 8s antes de asumir que no hay banner.
+      if (await this.cookieAcceptButton.isVisible({ timeout: 8000 })) {
         await this.cookieAcceptButton.click();
-        await this.cookieAcceptButton.waitFor({ state: 'hidden', timeout: 5000 });
+        await this.cookieAcceptButton.waitFor({ state: 'hidden', timeout: 8000 });
       }
     } catch {
       // El banner no apareció a tiempo: seguimos sin bloquear el test.
     }
+  }
+
+  /**
+   * Cierra modales de marketing que bloquean la interacción con la página:
+   * - Selector de país/región (aparece cuando el sitio detecta un país distinto)
+   * - Welcome mat / descuento de bienvenida ("15% OFF", "DECLINE OFFER")
+   * No falla si ninguno aparece.
+   */
+  async dismissModalsIfPresent(): Promise<void> {
+    // Welcome mat "ENJOY X% OFF" — botón DECLINE OFFER
+    try {
+      const declineBtn = this.page.getByRole('button', { name: /decline offer/i });
+      if (await declineBtn.isVisible({ timeout: 8000 })) {
+        await declineBtn.click();
+      }
+    } catch { /* modal no presente */ }
+
+    // Selector de país/región — botón CANCELAR o CANCEL
+    try {
+      const cancelBtn = this.page.getByRole('button', { name: /cancel/i });
+      if (await cancelBtn.isVisible({ timeout: 3000 })) {
+        await cancelBtn.click();
+      }
+    } catch { /* modal no presente */ }
   }
 }
