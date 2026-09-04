@@ -92,12 +92,28 @@ export default defineConfig({
         baseURL: process.env.INSIDE_STORY_BASE_URL,
       },
     },
-    // ─── Sanity — health checks cross-site multi-región ─────────────────────
+    // ─── Sanity — health checks cross-site multi-región (Chrome · Firefox · Safari) ─
     {
-      name: 'sanity',
+      name: 'sanity-chrome',
       testMatch: 'sanity/**/*.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
+        httpCredentials,
+      },
+    },
+    {
+      name: 'sanity-firefox',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Firefox'],
+        httpCredentials,
+      },
+    },
+    {
+      name: 'sanity-safari',
+      testMatch: 'sanity/**/*.spec.ts',
+      use: {
+        ...devices['Desktop Safari'],
         httpCredentials,
       },
     },
